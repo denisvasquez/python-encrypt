@@ -7,9 +7,10 @@ class App:
         self.master = master
         self.master.title("Encriptador de texto") 
         self.master.resizable(False, False)
+        self.encriptions = []
         self.buttons()
         self.labels()
-        self.inputs();
+        self.inputs()
         self.table()
     
     def buttons(self):
@@ -58,15 +59,35 @@ class App:
             return
 
         encrypted = encode(pass_to_ascii(text), str(key), times)        
-        datos = {
-            "encrypted": encrypted,
-            "times": times,
-            "key": key
-        }
-        print(datos)
+        datos = (
+            encrypted,
+            times,
+            key
+        )
+        self.tree.insert("", tk.END, values=datos) 
+
+    def table_item_selected(self, event):
+        for selected_item in self.tree.selection():
+            item = self.tree.item(selected_item)
+            record = item["values"]
+            print(record)
 
     def table(self):
-        pass
+        columns = ("Encriptado", "Encripciones", "Llave")
+
+        self.tree = ttk.Treeview(self.master, columns=columns, show="headings")
+        self.tree.heading("Encriptado", text="Encriptado")
+        self.tree.heading("Encripciones", text="Encripciones")
+        self.tree.heading("Llave", text="Llave")
+
+
+        scrollbar = ttk.Scrollbar(self.master, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscroll=scrollbar.set)
+        scrollbar.grid(row=5, column=3, sticky='ns')
+
+        self.tree.bind('<<TreeviewSelect>>', self.table_item_selected)
+
+        self.tree.grid(row=5, column=0, columnspan=3)
 
 if __name__ == "__main__":
     window = master = tk.Tk()
