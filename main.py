@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, Toplevel
+from tkinter import ttk, Toplevel, StringVar, DISABLED
 from tocrypt import encode, decode, pass_to_ascii
 
 class App:
@@ -74,6 +74,17 @@ class App:
             decoded = ""
             for char in decode([int(item) for item in str(record[0]).split(" ")], str(record[2]), record[1]):
                 decoded += chr(char)
+
+            self.LblTmp1 = ttk.Label(self.tmp, text="Texto desencriptado: ")
+            self.LblTmp2 = ttk.Label(self.tmp, text="Numero de veces que se encripto: ")
+            self.LblTmp3 = ttk.Label(self.tmp, text="Juego de llaves usado: ")
+            self.LblTmp1.grid(row=0, column=0)
+            self.LblTmp2.grid(row=1, column=0)
+            self.LblTmp3.grid(row=2, column=0)
+
+            tk.Entry(self.tmp, textvariable=StringVar(self.tmp, value=decoded), state='readonly').grid(row=0, column=1)
+            tk.Entry(self.tmp, textvariable=StringVar(self.tmp, value=str(record[1])), state='readonly').grid(row=1, column=1)
+            tk.Entry(self.tmp, textvariable=StringVar(self.tmp, value=str(record[2])), state='readonly').grid(row=2, column=1)
 
             print("decoded", decoded)
 
