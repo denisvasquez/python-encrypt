@@ -1,4 +1,5 @@
 import tkinter as tk
+import string, random, re
 from tkinter import ttk, Toplevel, StringVar, DISABLED
 from tocrypt import encode, decode, pass_to_ascii
 
@@ -7,18 +8,31 @@ class App:
         self.master = master
         self.master.title("Encriptador de texto") 
         self.master.resizable(False, False)
+        self.encryptions = []
         self.buttons()
         self.labels()
         self.inputs()
         self.table()
+        self.insert_items()
     
     def buttons(self):
-        self.btn = ttk.Button(self.master, text="Encriptar", command=lambda: self.encrypt(
+        ttk.Button(self.master, text="Encriptar", command=lambda: self.encrypt(
             self.text_to_encrypt.get(),
             self.times_to_encrypt.get(),
             self.key_selected.get()
-        ), width=50)
-        self.btn.grid(row=4, column=2, sticky="w")
+        ), width=50).grid(row=4, column=2)
+
+        # Eliminar de la tabla
+        ttk.Button(self.master, text="Eliminar", command=self.delete_item,width=50).grid(row=5, column=2)
+
+    def insert_items(self):
+        records = self.tree.get_children()
+        for item in records:
+            self.tree.delete(item)
+        
+        for _, item in enumerate(self.encryptions):
+            item = (item + (_,))
+            self.tree.insert('', 'end', text = item[0], values=item)
     
     def inputs(self):
         self.text_to_encrypt = ttk.Entry(self.master, width=50)
@@ -34,75 +48,73 @@ class App:
         lbl_times = ttk.Label(self.master, text="Veces a encriptar:")
         lbl_keys = ttk.Label(self.master, text="Juego de llaves (1, 2, 3):")
 
+        self.alert = ttk.Label(self.master, text="").grid(row=6, column=0, columnspan=4)
+
         lbl_to_encrypt.grid(row=1, column=0)
         lbl_times.grid(row=2, column=0)
         lbl_keys.grid(row=3, column=0)
     
     def encrypt(self, text, times, key):
         if (text == "" or times == ""):
-            print("Alguno de los campos estan vacios")
+            self.alert["text"] = "Alguno de los campos estan vacios"
+            print()
             return
         
         try:
             key = int(key)
             if (int(key) > 3 or int(key) < 1):
-                print("La llave seleccionada no es valida")
-                return
+                self.alert["text"] = "La llave seleccionada no es valida"
             try:
                 times = int(times)
             except ValueError:
-                print("NO SE PUEDE INGRESAR LETRAS EN EL NUMERO DE VECES")
+                self.alert["text"] = "NO SE PUEDE INGRESAR LETRAS EN EL NUMERO DE VECES"
                 return
         except ValueError:
-            print("NO SE PUEDE INGRESAR LETRAS EN EL JUEGO DE LLAVES")
+            self.alert["text"] = "NO SE PUEDE INGRESAR LETRAS EN EL JUEGO DE LLAVES"
             return
 
-        encrypted = encode(pass_to_ascii(text), str(key), times)        
-        print("encripted", encrypted)
-        datos = (
+                
+        encrypted = ""
+        for char in encode(pass_to_ascii(text), str(key), times):
+            rand = random. choice(string. ascii_letters)
+            encrypted += str(char)+rand
+
+        self.encryptions.append(( 
+            text,
             encrypted,
             times,
             key
-        )
-        self.tree.insert("", tk.END, values=datos) 
+        ))
 
-    def table_item_selected(self, event):
-        for selected_item in self.tree.selection():
-            item = self.tree.item(selected_item)
-            record = item["values"]
-            self.tmp = Toplevel(self.master)
-            decoded = ""
-            for char in decode([int(item) for item in str(record[0]).split(" ")], str(record[2]), record[1]):
-                decoded += chr(char)
+        self.insert_items()
 
-            self.LblTmp1 = ttk.Label(self.tmp, text="Texto desencriptado: ")
-            self.LblTmp2 = ttk.Label(self.tmp, text="Numero de veces que se encripto: ")
-            self.LblTmp3 = ttk.Label(self.tmp, text="Juego de llaves usado: ")
-            self.LblTmp1.grid(row=0, column=0)
-            self.LblTmp2.grid(row=1, column=0)
-            self.LblTmp3.grid(row=2, column=0)
+    def delete_item(self):
+        try:
+            self.tree.item(self.tree.selection())["values"][4]
+        except IndexError as e:
+            return;
+        
+        index = self.tree.item(self.tree.selection())["values"][4]
+        
+        self.encryptions.pop(index)
 
-            tk.Entry(self.tmp, textvariable=StringVar(self.tmp, value=decoded), state='readonly').grid(row=0, column=1)
-            tk.Entry(self.tmp, textvariable=StringVar(self.tmp, value=str(record[1])), state='readonly').grid(row=1, column=1)
-            tk.Entry(self.tmp, textvariable=StringVar(self.tmp, value=str(record[2])), state='readonly').grid(row=2, column=1)
-
-            print("decoded", decoded)
+        self.insert_items();
+        
 
     def table(self):
-        columns = ("Encriptado", "Encripciones", "Llave")
+        columns = ("Original", "Encriptado", "Encripciones", "Llave")
 
         self.tree = ttk.Treeview(self.master, columns=columns, show="headings")
+        self.tree.heading("Original", text="Original")
         self.tree.heading("Encriptado", text="Encriptado")
         self.tree.heading("Encripciones", text="Encripciones")
         self.tree.heading("Llave", text="Llave")
 
         scrollbar = ttk.Scrollbar(self.master, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
-        scrollbar.grid(row=5, column=3, sticky='ns')
+        scrollbar.grid(row=7, column=3, sticky='ns')
 
-        self.tree.bind('<<TreeviewSelect>>', self.table_item_selected)
-
-        self.tree.grid(row=5, column=0, columnspan=3)
+        self.tree.grid(row=7, column=0, columnspan=3)
 
 if __name__ == "__main__":
     window = master = tk.Tk()
