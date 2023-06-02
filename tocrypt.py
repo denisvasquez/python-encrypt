@@ -1,7 +1,7 @@
 import json
 
 with open("./keys.json", "r") as f:
-        keys = json.load(f)
+    keys = json.load(f)
 
 def pass_to_ascii(text):
     ascii_values = [ord(char) for char in text]
@@ -11,22 +11,20 @@ def encode(array, key, times):
     exp_private = keys[key]["exp_private"]
     public = keys[key]["public"]
 
-    if times == 0:
+    if times <= 1:
         return array;
 
     array = [(item**exp_private) % public for item in array]
 
     return encode(array, key, times-1)
 
-def decode(secuency_encrypted, key, times, i = 0):
+def decode(array, key, times):
     private = keys[key]["private"]
     public = keys[key]["public"]
 
-    i = i + 1
+    if times <= 1:
+        return array
 
-    text_normal = [(item**private) % public for item in secuency_encrypted]
+    array = [(item**private) % public for item in array]
 
-    decode(text_normal, key, times, i)
-
-    return text_normal
-
+    return decode(array, key, times-1)

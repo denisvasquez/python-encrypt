@@ -3,5 +3,15 @@
         "public": 3233,
         "private": 2753,
         "exp_private": 17
+    },
+    "2": {
+        "public": 899,
+        "private": 611,
+        "exp_private": 11
+    },
+    "3": {
+        "public": 1517,
+        "private": 593,
+        "exp_private": 17
     }
 }

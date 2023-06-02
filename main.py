@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Toplevel
 from tocrypt import encode, decode, pass_to_ascii
 
 class App:
@@ -7,7 +7,6 @@ class App:
         self.master = master
         self.master.title("Encriptador de texto") 
         self.master.resizable(False, False)
-        self.encriptions = []
         self.buttons()
         self.labels()
         self.inputs()
@@ -59,6 +58,7 @@ class App:
             return
 
         encrypted = encode(pass_to_ascii(text), str(key), times)        
+        print("encripted", encrypted)
         datos = (
             encrypted,
             times,
@@ -70,7 +70,12 @@ class App:
         for selected_item in self.tree.selection():
             item = self.tree.item(selected_item)
             record = item["values"]
-            print(record)
+            self.tmp = Toplevel(self.master)
+            decoded = ""
+            for char in decode([int(item) for item in str(record[0]).split(" ")], str(record[2]), record[1]):
+                decoded += chr(char)
+
+            print("decoded", decoded)
 
     def table(self):
         columns = ("Encriptado", "Encripciones", "Llave")
@@ -79,7 +84,6 @@ class App:
         self.tree.heading("Encriptado", text="Encriptado")
         self.tree.heading("Encripciones", text="Encripciones")
         self.tree.heading("Llave", text="Llave")
-
 
         scrollbar = ttk.Scrollbar(self.master, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
