@@ -1,5 +1,5 @@
 import json
-
+import string, random
 with open("./keys.json", "r") as f:
     keys = json.load(f)
 
@@ -12,7 +12,11 @@ def encode(array, key, times):
     public = keys[key]["public"]
 
     if times <= 1:
-        return array;
+        _a = ""
+        for char in array:
+            rand = random.choice(string. ascii_letters)
+            _a += str(char)+rand
+        return _a[::-1]
 
     array = [(item**exp_private) % public for item in array]
 
